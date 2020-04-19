@@ -11,13 +11,10 @@ def get_sprite_dict():
         gray_image = image_file.convert("L")
         image_matrix = np.asarray(gray_image)
         avg_brightness = image_matrix.sum()//image_matrix.shape[0]**2
-        sprite_dict[filename] = avg_brightness
+        sprite_dict[avg_brightness] = gray_image
         image_file.close()
 
     return sprite_dict
-
-
-sprite_dict = get_sprite_dict()
 
 
 def gray_resized(in_image, percent):
@@ -32,20 +29,21 @@ def gray_resized(in_image, percent):
     return gray_image_resized
 
 
-def main():
-    classified_sprite = get_sprite_dict()
-    print(classified_sprite)
-
-
 def matrix_values():
-    gray_image_resized = gray_resized("grisi.jpg", 20)
-    sprite_dict_values = list(sprite_dict.values())
+    sprite_dict = get_sprite_dict()
+    gray_image_resized = gray_resized("Koala.jpg", 20)
+    sprite_dict_values = list(sprite_dict.keys())
     sprite_dict_values.sort(reverse=True)
     gray_image_resized_matrix = np.asarray(gray_image_resized)
     gray_image_resized_matrix_copy = gray_image_resized_matrix.copy()
     for i in range(len(sprite_dict_values)):
         gray_image_resized_matrix_copy[gray_image_resized_matrix < sprite_dict_values[i]] = sprite_dict_values[i]
     return gray_image_resized_matrix_copy
+
+
+def main():
+    q = Image.fromarray(matrix_values())
+    q.show()
 
 
 if __name__ == "__main__":
