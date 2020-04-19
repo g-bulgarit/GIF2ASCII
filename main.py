@@ -31,7 +31,7 @@ def gray_resized(in_image, percent):
 
 def matrix_values():
     sprite_dict = get_sprite_dict()
-    gray_image_resized = gray_resized("Koala.jpg", 20)
+    gray_image_resized = gray_resized("grisi.jpg", 95)
     sprite_dict_values = list(sprite_dict.keys())
     sprite_dict_values.sort(reverse=True)
     gray_image_resized_matrix = np.asarray(gray_image_resized)
@@ -41,10 +41,23 @@ def matrix_values():
     return gray_image_resized_matrix_copy
 
 
+def create_frame(image_matrix):
+    sprite_dict = get_sprite_dict()
+    img_hight = image_matrix.shape[0]
+    img_width = image_matrix.shape[1]
+    img_size = (img_hight*50, img_width*50)
+    output_img = Image.new('L', img_size, color=0)
+    for row in range(img_hight):
+        for col in range(img_width):
+            value = image_matrix[row][col]
+            output_img.paste(sprite_dict[value],box=(row*50,col*50))
+    return output_img
+
+
 def main():
-    q = Image.fromarray(matrix_values())
-    q.show()
-
-
+    q = matrix_values()
+    temp = create_frame(q)
+    my_dict = get_sprite_dict()
+    temp.show()
 if __name__ == "__main__":
     main()
