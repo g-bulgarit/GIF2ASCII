@@ -1,12 +1,11 @@
 import glob
 from PIL import Image
 import numpy as np
+file_list = glob.glob("Sprites/*")
 
 
 def get_sprite_dict():
     sprite_dict = {}
-    file_list = glob.glob("Sprites/*")
-
     for filename in file_list:
         image_file = Image.open(filename)
         gray_image = image_file.convert("L")
@@ -18,13 +17,7 @@ def get_sprite_dict():
     return sprite_dict
 
 
-def main():
-    classified_sprite = get_sprite_dict()
-    print(classified_sprite)
-
-
-if __name__ == "__main__":
-    main()
+sprite_dict = get_sprite_dict()
 
 
 def gray_resized(in_image, percent):
@@ -37,3 +30,23 @@ def gray_resized(in_image, percent):
     new_size = (new_width, new_hight)
     gray_image_resized = gray_image.resize(new_size)
     return gray_image_resized
+
+
+def main():
+    classified_sprite = get_sprite_dict()
+    print(classified_sprite)
+
+
+def matrix_values():
+    gray_image_resized = gray_resized("grisi.jpg", 20)
+    sprite_dict_values = list(sprite_dict.values())
+    sprite_dict_values.sort(reverse=True)
+    gray_image_resized_matrix = np.asarray(gray_image_resized)
+    gray_image_resized_matrix_copy = gray_image_resized_matrix.copy()
+    for i in range(len(sprite_dict_values)):
+        gray_image_resized_matrix_copy[gray_image_resized_matrix < sprite_dict_values[i]] = sprite_dict_values[i]
+    return gray_image_resized_matrix_copy
+
+
+if __name__ == "__main__":
+    main()
