@@ -32,6 +32,8 @@ def gray_resized(in_image, percent):
 
 def matrix_values(input_img, sprites):
     gray_image_resized = gray_resized(input_img, 90)
+def matrix_values(input_img, sprites, resize_value):
+    gray_image_resized = gray_resized(input_img, resize_value)
     sprite_dict_values = list(sprites.keys())
     sprite_dict_values.sort(reverse=True)
     gray_image_resized_matrix = np.asarray(gray_image_resized)
@@ -57,6 +59,7 @@ def main():
     img_path = "Koala.jpg"
     sprite_dictionary = get_sprite_dict()
     color_matrix = matrix_values(img_path, sprite_dictionary)
+    color_matrix = matrix_values(img_path, sprite_dictionary, 85)
 
     constructed_frame = create_frame(color_matrix, sprite_dictionary)
     constructed_frame.show()
