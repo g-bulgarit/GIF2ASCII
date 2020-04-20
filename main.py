@@ -3,6 +3,8 @@ import glob
 from PIL import Image
 import numpy as np
 import imageio
+from gooey import Gooey, GooeyParser
+
 
 def get_sprite_dict(sprite_size=50):
     # Load all sprites from the sprite folder,
@@ -94,12 +96,12 @@ def extract_frames(in_gif, out_folder):
     return True
 
 
-def frames_to_ascii(path, sprite_dictionary, out_path):
+def frames_to_ascii(path, sprite_dictionary, out_path, scale_down):
     path += "/*"
     frame_list = glob.glob(path)
     frame_list.sort(key=lambda x: sort_filenames(x))
     for number, filename in enumerate(frame_list):
-        ascii_frame_matrix = matrix_values(filename, sprite_dictionary, 50)
+        ascii_frame_matrix = matrix_values(filename, sprite_dictionary, scale_down)
         constructed_frame = create_frame(ascii_frame_matrix, sprite_dictionary)
         out_file_name = out_path + "/" + str(number) + ".gif"
         constructed_frame.save(out_file_name)
@@ -121,12 +123,41 @@ def create_gif(folder):
         os.remove(file)
 
 
-
-
+@Gooey(language="english")
 def main():
-    sprite_dictionary = get_sprite_dict(10)
-    extract_frames("giphy.gif", "gif_frames")
-    frames_to_ascii("gif_frames", sprite_dictionary, "ascii_frames")
+    parser = GooeyParser(description="Select an image to process")
+    parser.add_argument('path', metavar='File', widget="FileChooser", help="Browse to your file.")
+    parser.add_argument('--scale_down',
+                        metavar="Scale Down %",
+                        type=int,
+                        default=50,
+                        gooey_options={
+                            'validator': {
+                                'test': '0 < int(user_input) < 100',
+                                'message': 'Scale down % can\'t be negative or larger than 100%!'
+                            }
+                        }
+                        )
+    parser.add_argument('--tile_size',
+                        metavar="tile size in pixels",
+                        type=int,
+                        default=20,
+                        gooey_options={
+                            'validator': {
+                                'test': '0 < int(user_input) < 100',
+                                'message': 'Tile can\'t be negative or larger than 100!'
+                            }
+                        }
+                        )
+    arguments = parser.parse_args()
+    path = arguments.path
+    scale_down = arguments.scale_down
+    tile_size = arguments.tile_size
+    sprite_dictionary = get_sprite_dict(tile_size)
+    extract_frames(path, "gif_frames")
+    frames_to_ascii("gif_frames", sprite_dictionary, "ascii_frames", scale_down)
     create_gif("ascii_frames/*")
+
+
 if __name__ == "__main__":
     main()
