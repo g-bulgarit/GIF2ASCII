@@ -143,23 +143,29 @@ def create_gif(folder):
     delete_gifs("gif_frames/")
 
 
-@Gooey(language="english")
+@Gooey(program_name="GIF-2-ASCII", image_dir='icons/')
 def main():
-    parser = GooeyParser(description="Select an image to process")
+    # Parse using gooey;
+    parser = GooeyParser(description="Select a gif to ascii-fy, use the optional text boxes below to \n"
+                                     "configure some of the behavior of the program.")
     parser.add_argument('path', metavar='File', widget="FileChooser", help="Browse to your file.")
     parser.add_argument('--scale_down',
-                        metavar="Scale Down %",
+                        metavar="Scale Down",
+                        help="Scale down original gif by some percentage [%] \n"
+                                "It is recommended to try higher numbers first.",
                         type=int,
                         default=50,
                         gooey_options={
                             'validator': {
                                 'test': '0 < int(user_input) < 100',
-                                'message': 'Scale down % can\'t be negative or larger than 100%!'
+                                'message': 'Scale down [%] has to be between 0 and 100%!'
                             }
                         }
                         )
     parser.add_argument('--tile_size',
-                        metavar="tile size in pixels",
+                        metavar="ASCII Tile Size",
+                        help="Tiles are 50x50, lowering the value decreases output gif size.\n"
+                             "Fiddle with with the scale down before fiddling with this.",
                         type=int,
                         default=20,
                         gooey_options={
@@ -173,11 +179,12 @@ def main():
     path = arguments.path
     scale_down = arguments.scale_down
     tile_size = arguments.tile_size
+
+    # Main flow
     sprite_dictionary = get_sprite_dict(tile_size)
     extract_frames(path, "gif_frames")
     frames_to_ascii("gif_frames", sprite_dictionary, "ascii_frames", scale_down)
     create_gif("ascii_frames/*")
-
 
 if __name__ == "__main__":
     main()
