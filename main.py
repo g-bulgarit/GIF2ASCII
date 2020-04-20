@@ -1,13 +1,14 @@
+import os
 import glob
 from PIL import Image
 import numpy as np
-
+import imageio
 
 def get_sprite_dict(sprite_size=50):
     # Load all sprites from the sprite folder,
     # Get the image objects and their grayscale values into a dictionary and return it.
     sprite_dict = {}
-    file_list = glob.glob("Sprites3/*")
+    file_list = glob.glob("Sprites/*")
 
     for filename in file_list:
         image_file = Image.open(filename)
@@ -18,6 +19,10 @@ def get_sprite_dict(sprite_size=50):
         image_file.close()
 
     return sprite_dict
+
+
+def sort_filenames(st):
+    return int(st.split("\\")[-1].strip(".gif"))
 
 
 def grayscale_and_resize(in_image, percent):
@@ -75,14 +80,46 @@ def create_frame(value_matrix, sprites):
     return output_img
 
 
+def extract_frames(in_gif, out_folder):
+    frame = Image.open(in_gif)
+    nframes = 0
+    while frame:
+        # frame.save('%s/%s-%s.gif' % (out_folder, os.path.basename(in_gif), nframes), 'GIF')
+        frame.save('%s/%s.gif' % (out_folder, nframes), 'GIF')
+        nframes += 1
+        try:
+            frame.seek(nframes)
+        except EOFError:
+            break
+    return True
+
+
+def frames_to_ascii(path, sprite_dictionary, out_path):
+    path += "/*"
+    frame_list = glob.glob(path)
+    frame_list.sort(key=lambda x: sort_filenames(x))
+    for number, filename in enumerate(frame_list):
+        ascii_frame_matrix = matrix_values(filename, sprite_dictionary, 50)
+        constructed_frame = create_frame(ascii_frame_matrix, sprite_dictionary)
+        out_file_name = out_path + "/" + str(number) + ".gif"
+        constructed_frame.save(out_file_name)
+
+
+
+def create_gif(folder):
+    images = []
+    frame_list = glob.glob(folder)
+    frame_list.sort(key=lambda x: sort_filenames(x))
+    for filename in frame_list:
+        images.append(imageio.imread(filename))
+    imageio.mimsave('output.gif', images)
+
+
+
 def main():
-    img_path = "Koala.jpg"
-
     sprite_dictionary = get_sprite_dict(10)
-    color_matrix = matrix_values(img_path, sprite_dictionary, 85)
-    constructed_frame = create_frame(color_matrix, sprite_dictionary)
-    constructed_frame.show()
-
-
+    extract_frames("giphy.gif", "gif_frames")
+    frames_to_ascii("gif_frames", sprite_dictionary, "ascii_frames")
+    create_gif("ascii_frames/*")
 if __name__ == "__main__":
     main()
