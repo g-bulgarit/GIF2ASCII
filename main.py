@@ -108,11 +108,18 @@ def frames_to_ascii(path, sprite_dictionary, out_path):
 
 def create_gif(folder):
     images = []
-    frame_list = glob.glob(folder)
+    frame_list = glob.glob(folder + ".gif")
     frame_list.sort(key=lambda x: sort_filenames(x))
     for filename in frame_list:
         images.append(imageio.imread(filename))
     imageio.mimsave('output.gif', images)
+    files_to_delete = glob.glob("ascii_frames/*.gif")
+    for file in files_to_delete:
+        os.remove(file)
+    files_to_delete = glob.glob("gif_frames/*.gif")
+    for file in files_to_delete:
+        os.remove(file)
+
 
 
 

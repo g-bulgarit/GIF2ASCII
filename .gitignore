@@ -2,3 +2,4 @@
 *.PNG
 .idea/*
 venv/*
+*.gif
