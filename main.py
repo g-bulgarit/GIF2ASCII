@@ -24,6 +24,9 @@ def get_sprite_dict(sprite_size=50):
 
 
 def sort_filenames(st):
+    # Function to sort lists by filenames as integers,
+    # instead of in lexicographical order.
+    # To be used as key= in the .sort() method.
     return int(st.split("\\")[-1].strip(".gif"))
 
 
@@ -42,7 +45,6 @@ def grayscale_and_resize(in_image, percent):
 
 
 def matrix_values(input_img, sprites, resize_value):
-
     # Get a list of all grayscale values in our sprites
     sprite_dict_values = list(sprites.keys())
     sprite_dict_values.sort(reverse=True)
@@ -83,23 +85,37 @@ def create_frame(value_matrix, sprites):
 
 
 def extract_frames(in_gif, out_folder):
+    # Split :in_gif: to separate .gif files containing only one frame.
+    # Save all these new files in :out_folder:.
+
     frame = Image.open(in_gif)
-    nframes = 0
+    frame_number = 0
     while frame:
-        # frame.save('%s/%s-%s.gif' % (out_folder, os.path.basename(in_gif), nframes), 'GIF')
-        frame.save('%s/%s.gif' % (out_folder, nframes), 'GIF')
-        nframes += 1
+        frame.save('%s/%s.gif' % (out_folder, frame_number), 'GIF')
+        frame_number += 1
         try:
-            frame.seek(nframes)
+            frame.seek(frame_number)
         except EOFError:
             break
     return True
 
 
+def delete_gifs(path):
+    files_to_delete = glob.glob(path + "*.gif")
+    for file in files_to_delete:
+        os.remove(file)
+
+
 def frames_to_ascii(path, sprite_dictionary, out_path, scale_down):
+    # Convert single-frame gifs from :path: to ascii-fied pictures.
+    # Optionally, scale down the sprites used to reduce image size.
+
+    # Read and sort our images to ascii-fy.
     path += "/*"
     frame_list = glob.glob(path)
     frame_list.sort(key=lambda x: sort_filenames(x))
+
+    # For each image, ascii-fy and save the result in :out_path:.
     for number, filename in enumerate(frame_list):
         ascii_frame_matrix = matrix_values(filename, sprite_dictionary, scale_down)
         constructed_frame = create_frame(ascii_frame_matrix, sprite_dictionary)
@@ -107,20 +123,24 @@ def frames_to_ascii(path, sprite_dictionary, out_path, scale_down):
         constructed_frame.save(out_file_name)
 
 
-
 def create_gif(folder):
+    # Take a :folder: of images and make a gif out of it.
+
     images = []
+    # Read and sort the images in the input folder.
     frame_list = glob.glob(folder + ".gif")
     frame_list.sort(key=lambda x: sort_filenames(x))
+
+    # Append the images (as imageio objects) to a list
     for filename in frame_list:
         images.append(imageio.imread(filename))
+
+    # Turn the list into a gif :)
     imageio.mimsave('output.gif', images)
-    files_to_delete = glob.glob("ascii_frames/*.gif")
-    for file in files_to_delete:
-        os.remove(file)
-    files_to_delete = glob.glob("gif_frames/*.gif")
-    for file in files_to_delete:
-        os.remove(file)
+
+    # Delete everything gif in our folders.
+    delete_gifs("ascii_frames/")
+    delete_gifs("gif_frames/")
 
 
 @Gooey(language="english")
